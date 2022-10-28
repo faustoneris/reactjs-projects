@@ -1,4 +1,4 @@
-import { Play } from 'phosphor-react'
+// components
 import {
   CountdownContainer,
   FormContainer,
@@ -9,10 +9,46 @@ import {
   TaskInput,
 } from './styles'
 
+// libs
+import { Play } from 'phosphor-react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+// consts
+import {
+  newCycleFormValidationSchema,
+  NewCycleFormData,
+} from './utils/form-validation'
+
 export function Home() {
+  const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
+    resolver: zodResolver(newCycleFormValidationSchema),
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
+  })
+
+  function handleCreateNewCycle(data: any) {
+    console.log(data)
+    reset()
+  }
+
+  const task = watch('task')
+  const isSubmitDisabled = !task
+
+  /*
+  * register(name: string) {
+    return {
+      onChange: () => void
+      onBlur: () => void
+      onFocus: () => void
+    }
+  } 
+  */
   return (
     <HomeContainer>
-      <form action="">
+      <form onSubmit={handleSubmit(handleCreateNewCycle)} action="">
         <FormContainer>
           <label htmlFor="task">Vou trabalhar em</label>
           <TaskInput
@@ -20,6 +56,7 @@ export function Home() {
             id="task"
             type="text"
             list="task-sugg"
+            {...register('task')}
           />
 
           <datalist id="task-sugg">
@@ -35,8 +72,7 @@ export function Home() {
             type="number"
             id="minutesAmount"
             step={5}
-            min={5}
-            max={60}
+            {...register('minutesAmount', { valueAsNumber: true })}
           />
 
           <span>minutos.</span>
@@ -50,7 +86,7 @@ export function Home() {
           <span>0</span>
         </CountdownContainer>
 
-        <StartCountdownButton disabled type="submit">
+        <StartCountdownButton disabled={isSubmitDisabled} type="submit">
           <Play size={24} /> Começar
         </StartCountdownButton>
       </form>
